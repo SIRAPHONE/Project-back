@@ -41,7 +41,7 @@ const Order = sequelize.define('Order',{
         autoIncrement: true,
         primaryKey: true
     },
-    Customer: {
+    CustomerID: {
         type: Sequelize.INTEGER,
         allowNull:false
     },
@@ -49,7 +49,7 @@ const Order = sequelize.define('Order',{
         type: Sequelize.DATE,
         allowNull:false
     },
-    ToralAmoount: {
+    TotalAmoount: {
         type: Sequelize.INTEGER,
         allowNull:false
     },      

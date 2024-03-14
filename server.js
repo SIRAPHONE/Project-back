@@ -331,6 +331,14 @@ app.get ('/OrderDetails/:id' , (req,res) =>{
 });
 
 //route to create a new
+// app.post('/OrderDetails',(req,res) => {
+//     OrderDetail.create(req.body).then(orderDetail =>{
+//         res.send(orderDetail);
+//     }).catch(err => {
+//         res.status(500).send(err);
+//     });
+// });
+
 app.post('/OrderDetails',(req,res) => {
     OrderDetail.create(req.body).then(orderDetail =>{
         res.send(orderDetail);

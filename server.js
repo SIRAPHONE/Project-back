@@ -45,14 +45,22 @@ const Order = sequelize.define('Order',{
         type: Sequelize.INTEGER,
         allowNull:false
     },
-    OrderdateID: {
-        type: Sequelize.DATE,
-        allowNull:false
-    },
-    TotalAmoount: {
+    ProductID: {
         type: Sequelize.INTEGER,
         allowNull:false
-    },      
+    },
+    StockQuantity: {
+        type: Sequelize.INTEGER,
+        allowNull:false
+    },
+    TotalAmount: {
+        type: Sequelize.INTEGER,
+        allowNull:false
+    },
+    PriceAmount: {
+        type: Sequelize.INTEGER,
+        allowNull:false
+    },     
 });
 
 const Customer = sequelize.define('Customer',{
@@ -61,12 +69,8 @@ const Customer = sequelize.define('Customer',{
         autoIncrement: true,
         primaryKey: true
     },
-    Firstname: {
+    CustomerName: {
         type: Sequelize.STRING, 
-        allowNull:false
-    },
-    Lastname: {
-        type: Sequelize.STRING,
         allowNull:false
     },
     Email: {
@@ -242,7 +246,7 @@ app.delete('/orders/:id', (req, res) => {
 
 //----------------------------------------------------------------------
 //route to get
-app.get('/Customers',(req,res) =>{
+app.get('/customers',(req,res) =>{
     Customer.findAll().then(customer => {
         res.json(customer);
     }).catch(err => {
@@ -264,7 +268,8 @@ app.get ('/Customers/:id' , (req,res) =>{
 });
 
 //route to create a new
-app.post('/Customers',(req,res) => {
+app.post('/customers',(req,res) => {
+    console.log(req.body);
     Customer.create(req.body).then(customer =>{
         res.send(customer);
     }).catch(err => {
@@ -273,7 +278,8 @@ app.post('/Customers',(req,res) => {
 });
 
 //route to update 
-app.put ('/Customers/:id', (req,res) => {
+app.put ('/customers/:id', (req,res) => {
+    console.log(req.body);
     Customer.findByPk(req.params.id).then(customer => {
         if (!customer) {
             res.status(404).send('Customer not found');
@@ -290,7 +296,8 @@ app.put ('/Customers/:id', (req,res) => {
 });
 
 //route to delete
-app.delete('/Customers/:id', (req, res) => {
+app.delete('/customers/:id', (req, res) => {
+    console.log(req);
     Customer.findByPk(req.params.id).then(customer => {
         if (!customer){
             res.status(404).send('Customer not found');

@@ -49,18 +49,10 @@ const Order = sequelize.define('Order',{
         type: Sequelize.INTEGER,
         allowNull:false
     },
-    StockQuantity: {
-        type: Sequelize.INTEGER,
-        allowNull:false
-    },
     TotalAmount: {
         type: Sequelize.INTEGER,
         allowNull:false
-    },
-    PriceAmount: {
-        type: Sequelize.INTEGER,
-        allowNull:false
-    },     
+    },    
 });
 
 const Customer = sequelize.define('Customer',{
@@ -106,6 +98,12 @@ const OrderDetail = sequelize.define('OrderDetail',{
         allowNull:false
     },
 }); 
+
+
+Customer.hasMany(Order, {foreignKey: 'CustomerID'})
+Order.belongsTo(Customer, {foreignKey: 'CustomerID'})
+Product.hasMany(Order, {foreignKey: 'ProductID'})
+Order.belongsTo(Product, {foreignKey: 'ProductID'})
 
 sequelize.sync();
 
@@ -181,7 +179,7 @@ app.delete('/products/:id', (req, res) => {
 //----------------------------------------------------------------------
 //route to get
 app.get('/orders',(req,res) =>{
-    Order.findAll().then(order => {
+    Order.findAll({include:[Customer,Product]}).then(order => {
         res.json(order);
     }).catch(err => {
         res.status(500).send(err);
@@ -190,7 +188,7 @@ app.get('/orders',(req,res) =>{
 
 // route to get by id
 app.get ('/orders/:id' , (req,res) =>{
-    Order.findByPk(req.params.id).then(order => {
+    Order.findByPk(req.params.id, {include:[Customer,Product]}).then(order => {
         if(!order) {
             res.status(404).send('order not found');
         } else {
@@ -202,29 +200,45 @@ app.get ('/orders/:id' , (req,res) =>{
 });
 
 //route to create a new
-app.post('/orders',(req,res) => {
-    Order.create(req.body).then(order =>{
-        res.send(order);
-    }).catch(err => {
-        res.status(500).send(err);
-    });
+app.post('/orders', async(req,res) => {
+    try {
+        const product = await Product.findByPk(req.body.ProductID);
+        if(product){
+            product.update({ StockQuantity: product.StockQuantity  -  req.body.TotalAmount })
+        }
+        await Order.create(req.body);
+        
+        res.send(req.body);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
 
 //route to update 
-app.put ('/orders/:id', (req,res) => {
-    Order.findByPk(req.params.id).then(order => {
-        if (!order) {
-            res.status(404).send('order not found');
-        } else {
-            order.update(req.body).then(() => {
-                res.send(order);
-            }).catch(err => {
-                res.status(500).send(err);
-            });
+app.put('/orders/:id', async(req,res) => {
+    try {
+        const product = await Product.findByPk(req.body.ProductID);
+        const order = await Order.findByPk(req.params.id);
+        if(order.ProductID != req.body.ProductID){
+            const product_old = await Product.findByPk(order.ProductID);
+            product_old.update({ StockQuantity: product_old.StockQuantity  +  order.TotalAmount }) 
+            product.update({ StockQuantity: product.StockQuantity  -  req.body.TotalAmount })
         }
-    }).catch(err => {
-        res.status(500).send(err);
-    });
+
+        if(product){
+            if(order.TotalAmount > req.body.TotalAmount){
+                let change =  order.TotalAmount - req.body.TotalAmount;
+                product.update({ StockQuantity: product.StockQuantity  +  change })
+            }else{
+                let change =   req.body.TotalAmount - order.TotalAmount
+                product.update({ StockQuantity: product.StockQuantity  -  change })
+            }
+        }
+        order.update(req.body);
+        res.send(req.body);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
 
 //route to delete

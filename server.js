@@ -203,7 +203,7 @@ app.delete('/products/:id', (req, res) => {
 //----------------------------------------------------------------------
 //route to get
 app.get('/orders',(req,res) =>{
-    Order.findAll({include:[Customer,Product]}).then(order => {
+    Order.findAll({include:[Customer,Product,Promotion]}).then(order => {
         res.json(order);
     }).catch(err => {
         res.status(500).send(err);
@@ -212,7 +212,7 @@ app.get('/orders',(req,res) =>{
 
 // route to get by id
 app.get ('/orders/:id' , (req,res) =>{
-    Order.findByPk(req.params.id, {include:[Customer,Product]}).then(order => {
+    Order.findByPk(req.params.id, {include:[Customer,Product,Promotion]}).then(order => {
         if(!order) {
             res.status(404).send('order not found');
         } else {
@@ -434,8 +434,9 @@ app.get('/Promotion', async (req,res)=>{
 
 
 app.get('/Promotion/:id', async (req,res)=>{
-    const data = await Promotion.findByPk(req.params.id);
-    if(data){
+    console.log(req.params.id);
+    const data = await Promotion.findByPk(Number(req.params.id));
+    if(!data){
         res.status(404).send("Promotion not fond")
     }else{
         res.send(data)
@@ -447,25 +448,44 @@ app.post('/Promotion', async (req,res)=>{
         const resp =  await  Promotion.create(req.body);
         res.status(200).send(resp)
 
-    }catch{
+    }catch(err){
         res.status(404).send("Erro form insert")
     }
 
 })
 
 
-app.put ('/Promotion/:promotionID', async (req,res)=>{
+app.put('/Promotion/:promotionID', async (req,res)=>{
     try {
-        const  promotion = await Promotion.findByPk(req.params.promotionID);
+        const  promotion = await Promotion.findByPk(Number(req.params.promotionID));
         const resp = await promotion.update(req.body);
 
         res.status(200).send(resp)
 
-    }catch{
+    }catch(err){
         res.status(404).send("Erro form insert")
     }
 
 })
+
+app.delete('/Promotion/:promotionID', async (req,res)=>{
+    try {
+        const  promotion = await Promotion.findByPk(Number(req.params.promotionID));
+        if(promotion){
+            promotion.destroy();
+            res.send({})
+        }else{
+            res.status(404).send("not foind")
+        }
+
+        // res.status(200).send(resp)
+
+    }catch(err){
+        res.status(404).send("Erro form insert")
+    }
+
+})
+
 
 
 

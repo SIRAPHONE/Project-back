@@ -53,6 +53,10 @@ const Order = sequelize.define('Order',{
         type: Sequelize.INTEGER,
         allowNull:false
     },    
+    PromotionID: {
+        type: Sequelize.INTEGER,
+        allowNull:true
+    },
 });
 
 const Customer = sequelize.define('Customer',{
@@ -99,11 +103,31 @@ const OrderDetail = sequelize.define('OrderDetail',{
     },
 }); 
 
+const Promotion = sequelize.define('Promotion',{
+    PromotionID: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    PromotionCode: {
+        type: Sequelize.STRING,
+        allowNull:false
+    },
+    Discount: {
+        type:Sequelize.INTEGER,
+        allowNull:false
+    },
+});
+
 
 Customer.hasMany(Order, {foreignKey: 'CustomerID'})
 Order.belongsTo(Customer, {foreignKey: 'CustomerID'})
 Product.hasMany(Order, {foreignKey: 'ProductID'})
 Order.belongsTo(Product, {foreignKey: 'ProductID'})
+
+Promotion.hasMany(Order, {foreignKey: 'PromotionID'})
+Order.belongsTo(Promotion, {foreignKey: 'PromotionID'})
+
 
 sequelize.sync();
 
@@ -401,6 +425,49 @@ app.delete('/OrderDetails/:id', (req, res) => {
         res.status(500).send(err);
     });
 });
+
+
+app.get('/Promotion', async (req,res)=>{
+    const data = await Promotion.findAll();
+    res.send(data)
+})
+
+
+app.get('/Promotion/:id', async (req,res)=>{
+    const data = await Promotion.findByPk(req.params.id);
+    if(data){
+        res.status(404).send("Promotion not fond")
+    }else{
+        res.send(data)
+    }
+})
+
+app.post('/Promotion', async (req,res)=>{
+    try {
+        const resp =  await  Promotion.create(req.body);
+        res.status(200).send(resp)
+
+    }catch{
+        res.status(404).send("Erro form insert")
+    }
+
+})
+
+
+app.put ('/Promotion/:promotionID', async (req,res)=>{
+    try {
+        const  promotion = await Promotion.findByPk(req.params.promotionID);
+        const resp = await promotion.update(req.body);
+
+        res.status(200).send(resp)
+
+    }catch{
+        res.status(404).send("Erro form insert")
+    }
+
+})
+
+
 
 app.listen(3000, () => {
     console.log(`http://localhost:3000`);

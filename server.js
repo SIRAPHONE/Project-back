@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 const sequelize = new Sequelize('database' ,'root' ,'' , {
-    host: 'http://localhost:3000',
+    host: 'http://10.104.17.251:3000',
     dialect: 'sqlite',
     storage: './Database/database.sqlite'
 });
